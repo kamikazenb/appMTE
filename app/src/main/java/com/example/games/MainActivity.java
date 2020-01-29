@@ -14,7 +14,11 @@ import com.google.android.material.snackbar.Snackbar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.preference.PreferenceManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,6 +35,11 @@ public class MainActivity extends AppCompatActivity {
     private RequestQueue mQueue;
     private ArrayList<Game> games = new ArrayList<Game>();
     private Pages pages;
+    private String mainAddress = "https://rawg.io/api/games";
+    RecyclerView recyclerView;
+    RecyclerViewAdapter adapter;
+    private SwipeRefreshLayout refreshLayout;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,14 +56,32 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         pages = new Pages("null", "null");
+        initialRecycleItems();
         //42 init handleru s tym ze tento si pripravy frontu na volania
         mQueue = Volley.newRequestQueue(this);
+        refLayout();
         jsonParse();
     }
+    private void initialRecycleItems() {
+        recyclerView = findViewById(R.id.recycle_view);
+        adapter = new RecyclerViewAdapter(this, games);
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+    }
+    private void refLayout() {
+        refreshLayout = findViewById(R.id.swipe_refresh_layout);
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                jsonParse();
+            }
+        });
+    }
+
+
     private void jsonParse() {
-       // refreshLayout.setRefreshing(true);
         StringBuilder sb1 = new
-                StringBuilder("https://rawg.io/api/games");
+                StringBuilder(mainAddress);
         String url;
        // sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         //String name = sharedPreferences.getString("category", "");
@@ -99,6 +126,7 @@ public class MainActivity extends AppCompatActivity {
                            games.add(adding);
                         }
                         Toast.makeText(getApplicationContext(),"Games succesfully loaded",Toast.LENGTH_SHORT).show();
+                        addAndNotify();
                     }
                     else {
                         Toast.makeText(getApplicationContext(),"Error at games feed",Toast.LENGTH_SHORT).show();
@@ -119,7 +147,10 @@ public class MainActivity extends AppCompatActivity {
         });
         mQueue.add(request);
     }
-
+    private void addAndNotify(){
+        adapter.notifyDataSetChanged();
+        refreshLayout.setRefreshing(false);
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.

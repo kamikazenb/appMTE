@@ -19,14 +19,11 @@ public class Game {
         this.id = "error";
         this.name = "error";
         this.background_image = "error";
-        this.background_image = "error";
         this.rating = "error";
-
         this.platforms = new ArrayList<>();
         platforms.add("error");
         this.short_screenshots = new ArrayList<>();
         short_screenshots.add("error");
-
         this.released = "error";
     }
 
