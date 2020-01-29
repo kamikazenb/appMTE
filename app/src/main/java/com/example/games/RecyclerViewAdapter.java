@@ -14,6 +14,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
+import com.makeramen.roundedimageview.RoundedImageView;
+
 import java.util.ArrayList;
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -78,7 +80,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{
-        CircleImageView articleImage;
+        RoundedImageView articleImage;
         TextView articleTitle;
         TextView articleSource;
         RelativeLayout parentLayout;
