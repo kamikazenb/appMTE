@@ -8,6 +8,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -54,24 +56,46 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 .load(mGames.get(position).getBackground_image())
                 .into(holder.articleImage);
 
-        holder.articleTitle.setText(mGames.get(position).getName());
-        holder.articleSource.setText(mGames.get(position).getRating());
-//        holder.parentLayout.setOnClickListener(new View.OnClickListener() {
+        holder.gameName.setText(mGames.get(position).getName());
+        String sb = "Rating: "+  mGames.get(position).getRating() + "/5";
+        holder.gameRating.setText(sb);
+          sb = "Released: "+  mGames.get(position).getReleased();
+        holder.gameReleased.setText(sb);
+        StringBuilder sb1 = new StringBuilder("Platforms: ");
+        for (int i = 0; i<mGames.get(position).getPlatforms().size(); i++){
+            sb1.append(" ");
+            sb1.append(mGames.get(position).getPlatforms().get(i));
+            sb1.append(",");
+        }
+        sb1.setLength(sb1.length() - 1);
+        holder.gamePlatforms.setText(sb1.toString());
+        if(mGames.get(position).isFavorite()){
+            Toast.makeText(mContext ,"yea",Toast.LENGTH_SHORT).show();
+        }
+//        holder.favorite.setChecked(mGames.get(position).isFavorite());
+//        holder.favorite.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 //            @Override
-//            public void onClick(View view) {
-//                String urlString = mArticles.get(position).getArticleAddress();
-//                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(urlString));
-//                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                intent.setPackage("com.android.chrome");
-//                try {
-//                    mContext.startActivity(intent);
-//                } catch (ActivityNotFoundException ex) {
-//                    intent.setPackage(null);
-//                    mContext.startActivity(intent);
-//                }
+//            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
 //
+//                mGames.get(position).setFavorite(b);
 //            }
 //        });
+        holder.parentLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String urlString = mGames.get(position).getBackground_image();
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(urlString));
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.setPackage("com.android.chrome");
+                try {
+                    mContext.startActivity(intent);
+                } catch (ActivityNotFoundException ex) {
+                    intent.setPackage(null);
+                    mContext.startActivity(intent);
+                }
+
+            }
+        });
     }
     //this tell adapter how many items is in your list
     @Override
@@ -81,8 +105,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     public class ViewHolder extends RecyclerView.ViewHolder{
         RoundedImageView articleImage;
-        TextView articleTitle;
-        TextView articleSource;
+        TextView gameName;
+        TextView gameRating;
+        TextView gameReleased;
+        TextView gamePlatforms;
+        CheckBox favorite;
         RelativeLayout parentLayout;
 
         /**
@@ -90,12 +117,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
          * thats why ViewHolder, becouse is hodling the view
          * @param itemView
          */
-
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             articleImage = itemView.findViewById(R.id.image);
-            articleSource = itemView.findViewById(R.id.source);
-            articleTitle = itemView.findViewById(R.id.title_name);
+            gameRating = itemView.findViewById(R.id.rating);
+            gameName = itemView.findViewById(R.id.title_name);
+            gameReleased = itemView.findViewById(R.id.released);
+            gamePlatforms = itemView.findViewById(R.id.platforms);
+            favorite = itemView.findViewById(R.id.favoriteBox);
             parentLayout = itemView.findViewById(R.id.parent_layout);
         }
     }

@@ -11,6 +11,7 @@ import com.android.volley.toolbox.Volley;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.preference.PreferenceManager;
@@ -39,6 +40,11 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView recyclerView;
     RecyclerViewAdapter adapter;
     private SwipeRefreshLayout refreshLayout;
+    int visibleItemCount;
+    int totalItemCount;
+    int pastVisiblesItems;
+    LinearLayoutManager mLayoutManager;
+    boolean loading = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,12 +67,36 @@ public class MainActivity extends AppCompatActivity {
         mQueue = Volley.newRequestQueue(this);
         refLayout();
         jsonParse();
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener()
+        {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy)
+            {
+                if(dy > 0) //check for scroll down
+                {
+                    visibleItemCount = mLayoutManager.getChildCount();
+                    totalItemCount = mLayoutManager.getItemCount();
+                    pastVisiblesItems = mLayoutManager.findFirstVisibleItemPosition();
+
+                    if (loading)
+                    {
+                        if ( (visibleItemCount + pastVisiblesItems) >= totalItemCount-1)
+                        {
+                            loading = false;
+                            jsonParse(pages.getNext(), false);
+                        }
+                    }
+                }
+            }
+        });
     }
     private void initialRecycleItems() {
         recyclerView = findViewById(R.id.recycle_view);
         adapter = new RecyclerViewAdapter(this, games);
         recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mLayoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(mLayoutManager);
+
     }
     private void refLayout() {
         refreshLayout = findViewById(R.id.swipe_refresh_layout);
@@ -78,6 +108,70 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void jsonParse(String url, final boolean deleteOld){
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    if(deleteOld){
+                        games.removeAll(new ArrayList<>(games));
+                    }
+                    pages = new Pages(response.getString("next"), response.getString("previous"));
+                    JSONArray results = response.getJSONArray("results");
+                    if(results.length()>0){
+                        for (int i = 0; i < results.length(); i++) {
+
+                            ArrayList<String> screenshots = new ArrayList<String>();
+                            ArrayList<String> platforms = new ArrayList<String>();
+
+                            JSONObject game = results.getJSONObject(i);
+
+                            JSONArray short_screenshots = (JSONArray) results.getJSONObject(i).get("short_screenshots");
+                            JSONArray parent_platforms = (JSONArray) results.getJSONObject(i).get("parent_platforms");
+
+                            for (int j = 0; j<short_screenshots.length(); j++){
+                                JSONObject screen = short_screenshots.getJSONObject(j);
+                                screenshots.add(screen.getString("image"));
+                            }
+
+                            for (int j = 0; j<parent_platforms.length(); j++){
+                                JSONObject platform = parent_platforms.getJSONObject(j);
+                                platforms.add(platform.getJSONObject("platform").getString("name"));
+                            }
+
+                            Game adding = new Game(
+                                    game.getString("id"),
+                                    game.getString("name"),
+                                    game.getString("background_image"),
+                                    game.getString("rating"),
+                                    platforms,
+                                    screenshots,
+                                    game.getString("released")
+                            );
+                            games.add(adding);
+                        }
+                        Toast.makeText(getApplicationContext(),"Games succesfully loaded",Toast.LENGTH_SHORT).show();
+
+                    }
+                    else {
+                        Toast.makeText(getApplicationContext(),"Error at games feed",Toast.LENGTH_SHORT).show();
+                    }
+                    addAndNotify();
+
+                } catch (JSONException e) {
+                    Toast.makeText(getApplicationContext(),"Error at games feed",Toast.LENGTH_SHORT).show();
+
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(getApplicationContext(),"Error at games feed",Toast.LENGTH_SHORT).show();
+                error.printStackTrace();
+            }
+        });
+        mQueue.add(request);
+    }
 
     private void jsonParse() {
         StringBuilder sb1 = new
@@ -85,17 +179,19 @@ public class MainActivity extends AppCompatActivity {
         String url;
        // sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         //String name = sharedPreferences.getString("category", "");
-        sb1.append("?page_size=8");
+        sb1.append("?page_size=5");
         url = sb1.toString();
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 try {
+                    games.removeAll(new ArrayList<>(games));
                     pages = new Pages(response.getString("next"), response.getString("previous"));
                    JSONArray results = response.getJSONArray("results");
                     if(results.length()>0){
                         for (int i = 0; i < results.length(); i++) {
+
                             ArrayList<String> screenshots = new ArrayList<String>();
                             ArrayList<String> platforms = new ArrayList<String>();
 
@@ -126,12 +222,12 @@ public class MainActivity extends AppCompatActivity {
                            games.add(adding);
                         }
                         Toast.makeText(getApplicationContext(),"Games succesfully loaded",Toast.LENGTH_SHORT).show();
-                        addAndNotify();
+
                     }
                     else {
                         Toast.makeText(getApplicationContext(),"Error at games feed",Toast.LENGTH_SHORT).show();
                     }
-//                    addAndNotify();
+                    addAndNotify();
 
                 } catch (JSONException e) {
                     Toast.makeText(getApplicationContext(),"Error at games feed",Toast.LENGTH_SHORT).show();
@@ -148,6 +244,7 @@ public class MainActivity extends AppCompatActivity {
         mQueue.add(request);
     }
     private void addAndNotify(){
+        loading = true;
         adapter.notifyDataSetChanged();
         refreshLayout.setRefreshing(false);
     }

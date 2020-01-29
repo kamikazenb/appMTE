@@ -5,6 +5,7 @@ import android.util.EventLogTags;
 import java.util.ArrayList;
 
 public class Game {
+    private boolean favorite;
     private String id;
     private String name;
     private String background_image;
@@ -25,6 +26,7 @@ public class Game {
         this.short_screenshots = new ArrayList<>();
         short_screenshots.add("error");
         this.released = "error";
+        this.favorite = false;
     }
 
     /**
@@ -44,6 +46,15 @@ public class Game {
         this.platforms = platforms;
         this.short_screenshots = short_screenshots;
         this.released = released;
+        this.favorite =false;
+    }
+
+    public boolean isFavorite() {
+        return favorite;
+    }
+
+    public void setFavorite(boolean favorite) {
+        this.favorite = favorite;
     }
 
     public String getId() {
