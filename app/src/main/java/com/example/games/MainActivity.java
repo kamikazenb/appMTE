@@ -1,5 +1,6 @@
 package com.example.games;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -35,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<Game> games = new ArrayList<Game>();
     private Pages pages;
     private String mainAddress = "https://rawg.io/api/games";
+    private ArrayList<String> favorites;
     RecyclerView recyclerView;
     RecyclerViewAdapter adapter;
     private SwipeRefreshLayout refreshLayout;
@@ -64,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
         initialRecycleItems();
         //42 init handleru s tym ze tento si pripravy frontu na volania
         mQueue = Volley.newRequestQueue(this);
+        favorites = new ArrayList<String>();
         refLayout();
         jsonParse();
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener()
@@ -102,6 +105,16 @@ public class MainActivity extends AppCompatActivity {
                 id = data.getStringExtra("id");
                 no = data.getIntExtra("no",0);
                 favorite = data.getBooleanExtra("favorite", false);
+                if(favorite){
+                    favorites.add(id);
+                }else{
+                    for(int i = 0; i<favorites.size(); i++){
+                        if(favorites.get(i).equals(id)){
+                            favorites.remove(i);
+                            break;
+                        }
+                    }
+                }
                 games.get(no).setFavorite(favorite);
                 addAndNotify();
             }catch (Exception e){
@@ -307,7 +320,38 @@ public class MainActivity extends AppCompatActivity {
         if (id == R.id.action_settings) {
             return true;
         }
+        if (id == R.id.favorites) {
+            Intent intent = new Intent(this, GameFavoritesActivity.class);
+            if(favorites.size()>0){
+                favorites = removeDuplicates(favorites);
+                intent.putExtra("favorites", favorites);
+                    startActivityForResult(intent,888);
+            }else{
+                Toast.makeText(getApplicationContext(),"You have 0 favorite games",Toast.LENGTH_SHORT).show();
+            }
+
+        }
 
         return super.onOptionsItemSelected(item);
+    }
+    public static <T> ArrayList<T> removeDuplicates(ArrayList<T> list)
+    {
+
+        // Create a new ArrayList
+        ArrayList<T> newList = new ArrayList<T>();
+
+        // Traverse through the first list
+        for (T element : list) {
+
+            // If this element is not present in newList
+            // then add it
+            if (!newList.contains(element)) {
+
+                newList.add(element);
+            }
+        }
+
+        // return the new list
+        return newList;
     }
 }

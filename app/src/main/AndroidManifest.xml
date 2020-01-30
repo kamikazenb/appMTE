@@ -11,6 +11,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".GameFavoritesActivity"></activity>
         <activity
             android:name=".GameDetailActivity"
             android:label="@string/title_activity_game_detail"

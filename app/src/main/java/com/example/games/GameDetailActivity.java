@@ -130,7 +130,16 @@ public class GameDetailActivity extends AppCompatActivity {
         jsonParse(id);
     }
     @Override
-    public void onBackPressed() {
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                returnCall();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+    public void returnCall(){
         Intent intent = new Intent();
         intent.putExtra("id", id);
         intent.putExtra("no", no);
@@ -142,11 +151,10 @@ public class GameDetailActivity extends AppCompatActivity {
         }
 
         finish();
-//        Intent intent = new Intent(mContext, GameDetailActivity.class);
-//        intent.putExtra("id", id );
-//        intent.putExtra("favorite", favorite);
-//        intent.putExtra("no", no );
-//        mContext.startActivity(intent);
+    }
+    @Override
+    public void onBackPressed() {
+       returnCall();
     }
     private void jsonParse(String id) {
         StringBuilder sb1 = new
