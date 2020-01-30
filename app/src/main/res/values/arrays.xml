@@ -6,10 +6,6 @@
         <item>- name </item>
         <item>+ released </item>
         <item>- released </item>
-        <item>+ added </item>
-        <item>- added </item>
-        <item>+ created </item>
-        <item>- created </item>
         <item>+ rating </item>
         <item>- rating </item>
     </string-array>
@@ -20,10 +16,6 @@
         <item>-name</item>
         <item>released</item>
         <item>-released</item>
-        <item>added</item>
-        <item>-added</item>
-        <item>created</item>
-        <item>-created</item>
         <item>rating</item>
         <item>-rating</item>
     </string-array>

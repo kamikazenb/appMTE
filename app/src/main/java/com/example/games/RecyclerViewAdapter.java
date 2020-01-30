@@ -15,7 +15,8 @@ import com.bumptech.glide.Glide;
 import com.makeramen.roundedimageview.RoundedImageView;
 
 import java.util.ArrayList;
-
+//42 nemôžem použiť základny RecycleView.Adapter, lebo tento nevie čo chcem ako prepojiť, preto
+//42 musím po ňom dediť
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder>{
     private static final String TAG = "RecyclerViewAdapter";
 
@@ -36,21 +37,20 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        //puts ViewHolders in position, where should be
+        //42 puts ViewHolders in position, where should be
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_listitem, parent, false);
         return new ViewHolder(view);
     }
 
-    //method is called everytime item is added
+    //42 method is called everytime item is added
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
-        Log.d(TAG, "onBindViewHolder: called");
-
+        //42 Glide je použitie knižnice na vykreslovanie obrázkov
         Glide.with(mContext)
                 .asBitmap()
                 .load(mGames.get(position).getBackground_image())
                 .into(holder.articleImage);
-
+        //42 prosto posájam layout s Stringami
         holder.gameName.setText(mGames.get(position).getName());
         String sb = "Rating: "+  mGames.get(position).getRating() + "/5";
         holder.gameRating.setText(sb);
@@ -65,6 +65,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         sb1.setLength(sb1.length() - 1);
         holder.gamePlatforms.setText(sb1.toString());
         holder.gamefavorite.setChecked(mGames.get(position).isFavorite());
+        //42 ak niekto klikne na listItem, tak sa zavolá aktivita GameDetailActivity
+        //42 pričom ale mysli na to, že je to z kontextu MainActivity ! ! !
         holder.parentLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -79,7 +81,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 intent.putExtra("released", g.getReleased());
                 intent.putExtra("background_image", g.getBackground_image());
                 intent.putExtra("favorite", g.isFavorite());
-//                mContext.startActivity(intent);
                 ((Activity) mContext).startActivityForResult(intent,666);
             }
         });
@@ -90,7 +91,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         return mGames.size();
     }
 
+    //42 Tu sa spojí recycleView s Layout_listitem.xml a tento sa bude zapĺňať
     public class ViewHolder extends RecyclerView.ViewHolder{
+        //42 držiak pre obrázok, čo je samostatná implementovaná knižnica
         RoundedImageView articleImage;
         TextView gameName;
         TextView gameRating;

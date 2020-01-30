@@ -1,5 +1,5 @@
 package com.example.games;
-
+//42 v podstate len drží pokope linky nasledujúcej strany a predošlej (čo mi bolo aj tak na hovno)
 public class Pages {
     private String next;
     private String previous;
