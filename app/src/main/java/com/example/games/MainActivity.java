@@ -1,5 +1,6 @@
 package com.example.games;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.android.volley.Request;
@@ -9,17 +10,14 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 
-import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -57,8 +55,9 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
+                startActivity(new Intent(getApplicationContext(), GameDetailActivity.class));
             }
         });
         pages = new Pages("null", "null");
@@ -89,7 +88,38 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        int a = 5;
+       String id = "";
+        boolean favorite = false;
+        int no = 0;
+        if(resultCode==777){
+            try {
+                id = data.getStringExtra("id");
+                no = data.getIntExtra("no",0);
+                favorite = data.getBooleanExtra("favorite", false);
+                games.get(no).setFavorite(favorite);
+                addAndNotify();
+            }catch (Exception e){
+
+            }
+        }else{
+
+        }
+
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    protected void onStop() {
+
+        super.onStop();
+    }
+
     private void initialRecycleItems() {
         recyclerView = findViewById(R.id.recycle_view);
         adapter = new RecyclerViewAdapter(this, games);
@@ -98,6 +128,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(mLayoutManager);
 
     }
+
     private void refLayout() {
         refreshLayout = findViewById(R.id.swipe_refresh_layout);
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -179,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
         String url;
        // sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         //String name = sharedPreferences.getString("category", "");
-        sb1.append("?page_size=5");
+        sb1.append("?page_size=6");
         url = sb1.toString();
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
@@ -243,11 +274,21 @@ public class MainActivity extends AppCompatActivity {
         });
         mQueue.add(request);
     }
+
     private void addAndNotify(){
         loading = true;
         adapter.notifyDataSetChanged();
         refreshLayout.setRefreshing(false);
     }
+
+//    @Override
+//    protected void onPostResume() {
+//        Intent mIntent = getIntent();
+//        int no = mIntent.getIntExtra("no", 0);
+//        Toast.makeText(getApplicationContext(),"Games succesfully loaded"+no,Toast.LENGTH_SHORT).show();
+//        super.onPostResume();
+//    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.

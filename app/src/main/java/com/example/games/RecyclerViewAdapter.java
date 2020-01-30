@@ -1,5 +1,6 @@
 package com.example.games;
 
+import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -72,6 +73,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         if(mGames.get(position).isFavorite()){
             Toast.makeText(mContext ,"yea",Toast.LENGTH_SHORT).show();
         }
+        holder.gamefavorite.setChecked(mGames.get(position).isFavorite());
 //        holder.favorite.setChecked(mGames.get(position).isFavorite());
 //        holder.favorite.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 //            @Override
@@ -83,17 +85,19 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         holder.parentLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String urlString = mGames.get(position).getBackground_image();
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(urlString));
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.setPackage("com.android.chrome");
-                try {
-                    mContext.startActivity(intent);
-                } catch (ActivityNotFoundException ex) {
-                    intent.setPackage(null);
-                    mContext.startActivity(intent);
-                }
-
+                Intent intent = new Intent(mContext, GameDetailActivity.class);
+                Game g = mGames.get(position);
+                intent.putExtra("no", position );
+                intent.putExtra("name", g.getName());
+                intent.putExtra("id", g.getId());
+                intent.putExtra("rating", g.getRating());
+                intent.putExtra("short_screenshots", g.getShort_screenshots());
+                intent.putExtra("platforms", g.getPlatforms());
+                intent.putExtra("released", g.getReleased());
+                intent.putExtra("background_image", g.getBackground_image());
+                intent.putExtra("favorite", g.isFavorite());
+//                mContext.startActivity(intent);
+                ((Activity) mContext).startActivityForResult(intent,666);
             }
         });
     }
@@ -109,7 +113,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         TextView gameRating;
         TextView gameReleased;
         TextView gamePlatforms;
-        CheckBox favorite;
+        CheckBox gamefavorite;
         RelativeLayout parentLayout;
 
         /**
@@ -124,7 +128,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             gameName = itemView.findViewById(R.id.title_name);
             gameReleased = itemView.findViewById(R.id.released);
             gamePlatforms = itemView.findViewById(R.id.platforms);
-            favorite = itemView.findViewById(R.id.favoriteBox);
+            gamefavorite = itemView.findViewById(R.id.favoriteBox);
             parentLayout = itemView.findViewById(R.id.parent_layout);
         }
     }
