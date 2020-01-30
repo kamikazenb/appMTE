@@ -39,12 +39,10 @@ public class GameDetailActivity extends AppCompatActivity {
 
     private int no;
     private String id;
-    private String name;
     private TextView rating;
     private ArrayList<String> platforms;
 
     private ArrayList<String> short_screenshots;
-    private String released;
     private String background_image;
     private boolean favorite;
     //dalsie
@@ -54,7 +52,6 @@ public class GameDetailActivity extends AppCompatActivity {
     private TextView platformsnTextView;
     private TextView releasedTextView;
     FloatingActionButton fab;
-    Context mContext;
     boolean changed = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
