@@ -3,7 +3,7 @@ package com.example.games;
 import android.util.EventLogTags;
 
 import java.util.ArrayList;
-//42 Tento objekt predstavuje informácie o jednej hre
+
 public class Game {
     private boolean favorite;
     private String id;

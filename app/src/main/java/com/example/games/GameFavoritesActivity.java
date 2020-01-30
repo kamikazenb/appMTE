@@ -40,7 +40,7 @@ public class GameFavoritesActivity extends AppCompatActivity {
 
         try {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            //42 toto nefunguje DPC
+
             getActionBar().setTitle("Favorite games");
 
         }catch (Exception e){
@@ -50,12 +50,12 @@ public class GameFavoritesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_game_favorites);
                 games = new ArrayList<Game>();
         mQueue = Volley.newRequestQueue(this);
-        //42 vytiahnutie si ArrayListu favorites z Intentu
+
         initialRecycleItems();
         Intent mIntent = getIntent();
         favorites = mIntent.getStringArrayListExtra("favorites");
-        //42 nakoľko sme Intentom poslali len ID hier, tak je potrebné
-        //42 znovu volať apinu aby znovu zaplnila ArrayList Games
+
+
         jsonParse();
     }
 
@@ -74,8 +74,8 @@ public class GameFavoritesActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(mLayoutManager);
 
     }
-    //42 je tu aj spätné volanie zo zozbrazenia jednotlivej hry a ak už hra nie je
-    //42 v favorites tak sa z tiadial vykopne
+
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         int a = 5;
@@ -129,9 +129,9 @@ public class GameFavoritesActivity extends AppCompatActivity {
     public void onBackPressed() {
         returnCall();
     }
-    //42 tak toto je dá vec na figu, lebo miesto toho aby som API zavolal so hrami ktoré chcem zobraziť
-    //42 tak musím zavolať pre každú hru samostatne a blbne to kvôli tomu, ale žial som to nemal čas
-    //42 doriešiť
+
+
+
     private void jsonParse() {
         String url;
         for(int fa = 0; fa<favorites.size(); fa++){

@@ -57,8 +57,8 @@ public class GameDetailActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         fab = (FloatingActionButton) findViewById(R.id.fab);
-        //42 ak niekto klikne na FAV tak sa pridá medzi favorites a zároveň sa nastaví
-        //42 changed na true a Intent ktorý odpovedá bude iný (iné extra)
+
+
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -80,13 +80,13 @@ public class GameDetailActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mQueue = Volley.newRequestQueue(this);
-        //42 pospájanie prkov v Layoute
+
         descriptionTextView  = findViewById(R.id.gameText);
         articleImage = findViewById(R.id.gameBackgroundImage);
         platformsnTextView = findViewById(R.id.gamePlatforms);
         releasedTextView = findViewById(R.id.gameReleased);
         rating = findViewById(R.id.gameRating);
-        //42 povyťahované informácie z Intentu a rovno povkladané do layoutu
+
         Intent mIntent = getIntent();
         no = mIntent.getIntExtra("no", 0);
         String dummy;
@@ -126,7 +126,7 @@ public class GameDetailActivity extends AppCompatActivity {
 
         jsonParse(id);
     }
-    //42 ak klikneš na šípku späť
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -138,12 +138,12 @@ public class GameDetailActivity extends AppCompatActivity {
         }
     }
     public void returnCall(){
-        //42 vloženie payloadu do Intentu
+
         Intent intent = new Intent();
         intent.putExtra("id", id);
         intent.putExtra("no", no);
         intent.putExtra("favorite", favorite);
-        //42 nastaví sa resultCode podľa toho či užívateľ sahal na niečo
+
         if(changed){
             setResult(777, intent);
         }else {
@@ -152,12 +152,12 @@ public class GameDetailActivity extends AppCompatActivity {
 
         finish();
     }
-    //42 ak stlačíš tlačidlo späť
+
     @Override
     public void onBackPressed() {
        returnCall();
     }
-    //42 bežne v odpovedi z APIny kde je viacero hier nie je popis hry, preto ju treba zavolať znovu
+
     private void jsonParse(String id) {
         StringBuilder sb1 = new
                 StringBuilder("https://rawg.io/api/games/");
@@ -171,8 +171,8 @@ public class GameDetailActivity extends AppCompatActivity {
                     description = response.getString("description");
                     Toast.makeText(getApplicationContext(), "Games succesfully loaded", Toast.LENGTH_SHORT).show();
                     descriptionTextView.setText(description);
-                    //42 popis sa vráti ale ako HTML text (br atd...) a táto knižnica
-                    //42 ho pretransformuje pre Android verziu
+
+
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                         descriptionTextView.setText(Html.fromHtml(description, Html.FROM_HTML_MODE_COMPACT));
                     } else {
