@@ -3,10 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.example.games.MainActivity">
     <item
-        android:id="@+id/favorites"
-        android:orderInCategory="100"
-        android:title="Favorits"
-        app:showAsAction="never" />
+        android:id="@+id/action_search"
+        android:icon="@android:drawable/ic_menu_search"
+        app:showAsAction="always|collapseActionView"
+        app:actionViewClass="android.widget.SearchView"
+        android:title="Search"/>
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"

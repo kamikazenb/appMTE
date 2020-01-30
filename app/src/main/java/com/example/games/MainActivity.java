@@ -1,10 +1,14 @@
 package com.example.games;
 
 import android.app.Activity;
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
-
+import android.text.Html;
+import android.widget.SearchView;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -22,10 +26,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
+import android.widget.SearchView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -52,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
     int pastVisiblesItems;
     LinearLayoutManager mLayoutManager;
     boolean loading = true;
+    SearchView searchView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,9 +73,20 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
 //                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
 //                        .setAction("Action", null).show();
+                Intent intent = new Intent(getApplicationContext(), GameFavoritesActivity.class);
+                if(favorites.size()>0){
+                    favorites = removeDuplicates(favorites);
+                    intent.putExtra("favorites", favorites);
+                    startActivityForResult(intent,888);
+                }else{
+                    Toast.makeText(getApplicationContext(),"You have 0 favorite games",Toast.LENGTH_SHORT).show();
+                }
 
             }
         });
+
+
+
         pages = new Pages("null", "null");
         initialRecycleItems();
         //42 init handleru s tym ze tento si pripravy frontu na volania
@@ -106,6 +124,33 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu( Menu menu) {
+        getMenuInflater().inflate( R.menu.menu_main, menu);
+
+       final MenuItem myActionMenuItem = menu.findItem( R.id.action_search);
+         searchView= (SearchView) myActionMenuItem.getActionView();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                // Toast like print
+                Toast.makeText(getApplicationContext(), query, Toast.LENGTH_SHORT).show();
+                jsonParse(query);
+                if( ! searchView.isIconified()) {
+                    searchView.setIconified(true);
+                }
+                myActionMenuItem.collapseActionView();
+                return false;
+            }
+            @Override
+            public boolean onQueryTextChange(String s) {
+                // UserFeedback.show( "SearchOnQueryTextChanged: " + s);
+                return false;
+            }
+        });
+        return true;
     }
 
     @Override
@@ -149,8 +194,7 @@ public class MainActivity extends AppCompatActivity {
         }
         if (resultCode==555) {
             try {
-//                String a = sharedPreferences.getString("ordering");
-              Toast.makeText(getApplicationContext(), "bbbbb", Toast.LENGTH_SHORT).show();
+
                 jsonParse(generateUrl(), true);
 
             } catch (Exception e) {
@@ -182,10 +226,6 @@ public class MainActivity extends AppCompatActivity {
         }catch (Exception e){
 
         }
-
-
-
-        Toast.makeText(getApplicationContext(), sb1.toString(), Toast.LENGTH_SHORT).show();
         return sb1.toString();
 
     }
@@ -300,11 +340,58 @@ public class MainActivity extends AppCompatActivity {
         refreshLayout.setRefreshing(false);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
+    private void jsonParse(final String game) {
+        StringBuilder sb1 = new
+                StringBuilder("https://rawg.io/api/games/");
+        String url;
+        sb1.append(game);
+        url = sb1.toString();
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+
+                    JSONArray parent_platforms = (JSONArray) response.get("parent_platforms");
+                    ArrayList<String> platforms = new ArrayList<String>();
+                    for (int j = 0; j<parent_platforms.length(); j++){
+                        JSONObject platform = parent_platforms.getJSONObject(j);
+                        platforms.add(platform.getJSONObject("platform").getString("name"));
+                    }
+                    ArrayList<String> screenshots = new ArrayList<String>();
+                   screenshots.add("err");
+                    Game adding = new Game(
+                            response.getString("id"),
+                            response.getString("name"),
+                            response.getString("background_image"),
+                            response.getString("rating"),
+                            platforms,
+                            screenshots,
+                            response.getString("released")
+                    );
+                    if(favorites.size()>0){
+                        Set<String> set = new HashSet<String>(favorites);
+                        if(set.contains(adding.getId())){
+                            adding.setFavorite(true);
+                        }
+                    }
+                    games.removeAll(new ArrayList<>(games));
+                    games.add(adding);
+                    addAndNotify();
+
+                } catch (JSONException e) {
+                    Toast.makeText(getApplicationContext(), "Error at games feed", Toast.LENGTH_SHORT).show();
+
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(getApplicationContext(), "Error at games feed", Toast.LENGTH_SHORT).show();
+                error.printStackTrace();
+            }
+        });
+
+        mQueue.add(request);
     }
 
     @Override
@@ -320,14 +407,7 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(intent,555);
         }
         if (id == R.id.favorites) {
-            Intent intent = new Intent(this, GameFavoritesActivity.class);
-            if(favorites.size()>0){
-                favorites = removeDuplicates(favorites);
-                intent.putExtra("favorites", favorites);
-                    startActivityForResult(intent,888);
-            }else{
-                Toast.makeText(getApplicationContext(),"You have 0 favorite games",Toast.LENGTH_SHORT).show();
-            }
+
 
         }
 

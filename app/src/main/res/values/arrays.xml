@@ -1,6 +1,7 @@
 <resources>
     <!-- Reply Preference -->
     <string-array name="reply_entries">
+        <item>Default</item>
         <item>+ name </item>
         <item>- name </item>
         <item>+ released </item>
@@ -14,6 +15,7 @@
     </string-array>
 
     <string-array name="reply_values">
+        <item>null</item>
         <item>name</item>
         <item>-name</item>
         <item>released</item>
