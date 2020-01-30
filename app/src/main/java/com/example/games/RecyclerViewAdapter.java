@@ -70,9 +70,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         }
         sb1.setLength(sb1.length() - 1);
         holder.gamePlatforms.setText(sb1.toString());
-        if(mGames.get(position).isFavorite()){
-            Toast.makeText(mContext ,"yea",Toast.LENGTH_SHORT).show();
-        }
         holder.gamefavorite.setChecked(mGames.get(position).isFavorite());
 //        holder.favorite.setChecked(mGames.get(position).isFavorite());
 //        holder.favorite.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {

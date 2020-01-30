@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -61,9 +62,11 @@ public class GameFavoritesActivity extends AppCompatActivity {
 
     public void returnCall() {
         Intent intent = new Intent();
+        intent.putExtra("favorites", favorites);
         setResult(888, intent);
         finish();
     }
+
     private void initialRecycleItems() {
         recyclerView = findViewById(R.id.recycle_view_fav);
         adapter = new RecyclerViewAdapter(this, games);
@@ -83,18 +86,25 @@ public class GameFavoritesActivity extends AppCompatActivity {
                 id = data.getStringExtra("id");
                 no = data.getIntExtra("no",0);
                 favorite = data.getBooleanExtra("favorite", false);
-                if(favorite){
-                    favorites.add(id);
-                }else{
+                if(!favorite){
                     for(int i = 0; i<favorites.size(); i++){
                         if(favorites.get(i).equals(id)){
                             favorites.remove(i);
                             break;
                         }
                     }
+                    for (int i = 0; i<games.size(); i++){
+                        if(games.get(i).getId().equals(id)){
+                            games.remove(i);
+                            break;
+                        }
+                    }
+
                 }
-                games.get(no).setFavorite(favorite);
                 adapter.notifyDataSetChanged();
+                if(favorites.size()==0){
+                    Toast.makeText(getApplicationContext(), "You haven't any favorite games", Toast.LENGTH_SHORT).show();
+                }
             }catch (Exception e){
 
             }
@@ -104,11 +114,21 @@ public class GameFavoritesActivity extends AppCompatActivity {
 
         super.onActivityResult(requestCode, resultCode, data);
     }
-
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                returnCall();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
     @Override
     public void onBackPressed() {
         returnCall();
     }
+
     private void jsonParse() {
 
         String url;

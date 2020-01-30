@@ -29,6 +29,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
     //42 globalna premenna pre handler volani JSON
@@ -120,7 +122,22 @@ public class MainActivity extends AppCompatActivity {
             }catch (Exception e){
 
             }
-        }else{
+        } if (resultCode==888){
+            try {
+                favorites = data.getStringArrayListExtra("favorites");
+                Set<String> set = new HashSet<String>(favorites);
+                for (int i = 0; i<games.size(); i++){
+                    if(set.contains(games.get(i).getId())){
+                        Toast.makeText(getApplicationContext(), "Is here", Toast.LENGTH_SHORT).show();
+                        games.get(i).setFavorite(true);
+                    }else{
+                        games.get(i).setFavorite(false);
+                    }
+                    addAndNotify();
+                }
+            }catch (Exception e){
+
+            }
 
         }
 
@@ -129,7 +146,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
-
         super.onStop();
     }
 
