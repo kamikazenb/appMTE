@@ -29,11 +29,13 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
-
+//42 toto je základná aktivita ktorá sa spúšťa hneď po splashscreen
 public class MainActivity extends AppCompatActivity {
+    //42 premenné uložené v sharedPreferences
     SharedPreferences sharedPreferences;
     //42 globalna premenna pre handler volani JSON
     private RequestQueue mQueue;
+    //42 tu sú uložené všetky objekty  s hrami
     private ArrayList<Game> games = new ArrayList<Game>();
     private Pages pages;
     private String mainAddress = "https://rawg.io/api/games";
@@ -122,7 +124,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 // Toast like print
-                Toast.makeText(getApplicationContext(), query, Toast.LENGTH_SHORT).show();
                 jsonParse(query);
                 if( ! searchView.isIconified()) {
                     searchView.setIconified(true);
@@ -294,9 +295,7 @@ public class MainActivity extends AppCompatActivity {
                             }
                             games.add(adding);
                         }
-                        Toast.makeText(getApplicationContext(),"Games succesfully loaded",Toast.LENGTH_SHORT).show();
-
-                    }
+                       }
                     else {
                        Toast.makeText(getApplicationContext(),"Error at games feed",Toast.LENGTH_SHORT).show();
                     }

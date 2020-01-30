@@ -6,7 +6,9 @@ import android.os.Handler;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-
+//42 touto aktivitou celá aplikácia začína (je to nastavené v android manifeste)
+//42  pričom po 1 sekunde sa intentom spustí MainActivity
+//42 splashscreen sa zobrazuje kvôli tomu že sa vykreslí nie bežné okno ale v res/background_splash.xml
 public class SplashScreen extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
