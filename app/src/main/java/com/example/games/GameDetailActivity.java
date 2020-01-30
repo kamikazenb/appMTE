@@ -2,6 +2,7 @@ package com.example.games;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -34,6 +35,7 @@ import java.util.ArrayList;
 
 public class GameDetailActivity extends AppCompatActivity {
     private RequestQueue mQueue;
+
 
     private int no;
     private String id;

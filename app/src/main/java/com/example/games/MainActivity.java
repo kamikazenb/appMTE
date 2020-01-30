@@ -2,6 +2,7 @@ package com.example.games;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import com.android.volley.Request;
@@ -11,10 +12,12 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -22,6 +25,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -33,6 +37,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
+    SharedPreferences sharedPreferences;
     //42 globalna premenna pre handler volani JSON
     private RequestQueue mQueue;
     private ArrayList<Game> games = new ArrayList<Game>();
@@ -61,16 +66,23 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
 //                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
 //                        .setAction("Action", null).show();
-                startActivity(new Intent(getApplicationContext(), GameDetailActivity.class));
+
             }
         });
         pages = new Pages("null", "null");
         initialRecycleItems();
         //42 init handleru s tym ze tento si pripravy frontu na volania
         mQueue = Volley.newRequestQueue(this);
-        favorites = new ArrayList<String>();
+        try {
+            sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            Set<String> set = sharedPreferences.getStringSet("key", null);
+            favorites = new ArrayList<String>(set);
+        }catch (Exception e){
+            favorites = new ArrayList<String>();
+        }
+
         refLayout();
-        jsonParse();
+        jsonParse(generateUrl(), true);
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener()
         {
             @Override
@@ -119,33 +131,76 @@ public class MainActivity extends AppCompatActivity {
                 }
                 games.get(no).setFavorite(favorite);
                 addAndNotify();
-            }catch (Exception e){
-
-            }
+            }catch (Exception e){  }
         } if (resultCode==888){
             try {
                 favorites = data.getStringArrayListExtra("favorites");
                 Set<String> set = new HashSet<String>(favorites);
                 for (int i = 0; i<games.size(); i++){
                     if(set.contains(games.get(i).getId())){
-                        Toast.makeText(getApplicationContext(), "Is here", Toast.LENGTH_SHORT).show();
                         games.get(i).setFavorite(true);
                     }else{
                         games.get(i).setFavorite(false);
                     }
                     addAndNotify();
                 }
-            }catch (Exception e){
-
-            }
+            }catch (Exception e){ }
 
         }
+        if (resultCode==555) {
+            try {
+//                String a = sharedPreferences.getString("ordering");
+              Toast.makeText(getApplicationContext(), "bbbbb", Toast.LENGTH_SHORT).show();
+                jsonParse(generateUrl(), true);
 
+            } catch (Exception e) {
+
+            }
+        }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    private String generateUrl(){
+        StringBuilder sb1 = new StringBuilder(mainAddress);
+        sb1.append("?page_size=7");
+        try {
+            String date = sharedPreferences.getString("release_year", "");
+            String ordering = sharedPreferences.getString("ordering", "");
+            if(date != null && !date.isEmpty()){
+                sb1.append("&dates=");
+                sb1.append(date);
+                sb1.append("-01-01,");
+                sb1.append(date);
+                sb1.append("-01-31");
+                if(ordering != null && !ordering.isEmpty()){
+                    sb1.append("&ordering=");
+                    sb1.append(ordering);
+                }
+            }
+
+
+        }catch (Exception e){
+
+        }
+
+
+
+        Toast.makeText(getApplicationContext(), sb1.toString(), Toast.LENGTH_SHORT).show();
+        return sb1.toString();
+
+    }
     @Override
     protected void onStop() {
+        try {
+            Set<String> set = new HashSet<String>();
+            set.addAll(favorites);
+            SharedPreferences.Editor edit = sharedPreferences.edit();
+            edit.putStringSet("key", set);
+            edit.commit();
+        }catch (Exception e){
+
+        }
+
         super.onStop();
     }
 
@@ -163,7 +218,7 @@ public class MainActivity extends AppCompatActivity {
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                jsonParse();
+                jsonParse(generateUrl(), true);
             }
         });
     }
@@ -208,89 +263,24 @@ public class MainActivity extends AppCompatActivity {
                                     screenshots,
                                     game.getString("released")
                             );
+                            if(favorites.size()>0){
+                                Set<String> set = new HashSet<String>(favorites);
+                                if(set.contains(adding.getId())){
+                                    adding.setFavorite(true);
+                                }
+                            }
                             games.add(adding);
                         }
                         Toast.makeText(getApplicationContext(),"Games succesfully loaded",Toast.LENGTH_SHORT).show();
 
                     }
                     else {
-                        Toast.makeText(getApplicationContext(),"Error at games feed",Toast.LENGTH_SHORT).show();
+                       Toast.makeText(getApplicationContext(),"Error at games feed",Toast.LENGTH_SHORT).show();
                     }
                     addAndNotify();
 
                 } catch (JSONException e) {
-                    Toast.makeText(getApplicationContext(),"Error at games feed",Toast.LENGTH_SHORT).show();
-
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(getApplicationContext(),"Error at games feed",Toast.LENGTH_SHORT).show();
-                error.printStackTrace();
-            }
-        });
-        mQueue.add(request);
-    }
-
-    private void jsonParse() {
-        StringBuilder sb1 = new
-                StringBuilder(mainAddress);
-        String url;
-       // sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        //String name = sharedPreferences.getString("category", "");
-        sb1.append("?page_size=6");
-        url = sb1.toString();
-
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                try {
-                    games.removeAll(new ArrayList<>(games));
-                    pages = new Pages(response.getString("next"), response.getString("previous"));
-                   JSONArray results = response.getJSONArray("results");
-                    if(results.length()>0){
-                        for (int i = 0; i < results.length(); i++) {
-
-                            ArrayList<String> screenshots = new ArrayList<String>();
-                            ArrayList<String> platforms = new ArrayList<String>();
-
-                            JSONObject game = results.getJSONObject(i);
-
-                            JSONArray short_screenshots = (JSONArray) results.getJSONObject(i).get("short_screenshots");
-                            JSONArray parent_platforms = (JSONArray) results.getJSONObject(i).get("parent_platforms");
-
-                            for (int j = 0; j<short_screenshots.length(); j++){
-                                JSONObject screen = short_screenshots.getJSONObject(j);
-                                screenshots.add(screen.getString("image"));
-                            }
-
-                            for (int j = 0; j<parent_platforms.length(); j++){
-                                JSONObject platform = parent_platforms.getJSONObject(j);
-                                platforms.add(platform.getJSONObject("platform").getString("name"));
-                            }
-
-                            Game adding = new Game(
-                                    game.getString("id"),
-                                    game.getString("name"),
-                                    game.getString("background_image"),
-                                    game.getString("rating"),
-                                    platforms,
-                                    screenshots,
-                                    game.getString("released")
-                            );
-                           games.add(adding);
-                        }
-                        Toast.makeText(getApplicationContext(),"Games succesfully loaded",Toast.LENGTH_SHORT).show();
-
-                    }
-                    else {
-                        Toast.makeText(getApplicationContext(),"Error at games feed",Toast.LENGTH_SHORT).show();
-                    }
-                    addAndNotify();
-
-                } catch (JSONException e) {
-                    Toast.makeText(getApplicationContext(),"Error at games feed",Toast.LENGTH_SHORT).show();
+                   Toast.makeText(getApplicationContext(),"Error at games feed",Toast.LENGTH_SHORT).show();
 
                 }
             }
@@ -310,14 +300,6 @@ public class MainActivity extends AppCompatActivity {
         refreshLayout.setRefreshing(false);
     }
 
-//    @Override
-//    protected void onPostResume() {
-//        Intent mIntent = getIntent();
-//        int no = mIntent.getIntExtra("no", 0);
-//        Toast.makeText(getApplicationContext(),"Games succesfully loaded"+no,Toast.LENGTH_SHORT).show();
-//        super.onPostResume();
-//    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -334,7 +316,8 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            return true;
+            Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+            startActivityForResult(intent,555);
         }
         if (id == R.id.favorites) {
             Intent intent = new Intent(this, GameFavoritesActivity.class);
@@ -350,6 +333,7 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
     public static <T> ArrayList<T> removeDuplicates(ArrayList<T> list)
     {
 
